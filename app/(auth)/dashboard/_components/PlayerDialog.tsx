@@ -87,7 +87,7 @@ function PlayerDialog({playVideo, videoId}: PlayerDialogProps) {
                             controls={true}
                         />
                         <div className='flex gap-10 mt-10'>
-                            <Button variant="ghost" onClick={()=>{router.replace("/dashboard"); setOpenDialog(false)}}>Cancel</Button>
+                            <Button variant="ghost" onClick={()=>{router.refresh(); setOpenDialog(false)}}>Cancel</Button>
                             <Button>Export</Button>
                         </div>
                     </DialogDescription>

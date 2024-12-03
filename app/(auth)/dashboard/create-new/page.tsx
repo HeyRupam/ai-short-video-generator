@@ -8,10 +8,13 @@ import axios from 'axios';
 import CustomLoading from './_components/CustomLoading';
 import { v4 as uuidv4 } from 'uuid';
 import { VideoDataContext, ScriptItem, VideoData } from '@/app/_context/VideoDataContext';
-import { VideoData as VideoDataTable } from '@/configs/schema';
+import { Users, VideoData as VideoDataTable } from '@/configs/schema';
 import db from '@/configs/db';
 import { useUser } from '@clerk/nextjs';
 import PlayerDialog from '../_components/PlayerDialog';
+import { UserDetailsContext } from '@/app/_context/UserDetailsContext';
+import { toast } from 'sonner';
+import { eq } from 'drizzle-orm';
 
 function CreateNew() {
   const [formData, setFormData] = useState<Record<string, any>>({});
@@ -24,6 +27,8 @@ function CreateNew() {
   const [imageList, setImageList] = useState<string[]>([]);
   const { videoData, setVideoData } = useContext(VideoDataContext);
   const { user } = useUser();
+  const {userDetails, setUserDetails} = useContext(UserDetailsContext);
+
 
   const onHandleInputCheck = (fieldName: string, fieldValue: string) => {    
     setFormData(prev => ({
@@ -33,6 +38,10 @@ function CreateNew() {
   }
 
   const GetVideoScript = async () => {
+    if (!userDetails || typeof userDetails.credits !== 'number' || userDetails.credits <= 0) {
+      toast.error("You don't have enough credits to generate video script");
+      return;
+    }
     setLoading(true);
     const prompt = 'Write a script to generate '+ formData.duration +' video on topic : '+ formData.topic +' along with Ai image prompt in '+ formData.imageStyle +' format for each scene and give me result in JSON format with imagePrompt and ContextText as field';    
     
@@ -67,6 +76,19 @@ function CreateNew() {
     }
   }
 
+  const UpdateUserDetails = async () => {
+    const userEmail = user?.primaryEmailAddress?.emailAddress;
+    if (!userEmail || !userDetails?.credits) return;
+    await db.update(Users).set({
+      credits: userDetails?.credits - 10
+    }).where(eq(Users.email, userEmail));
+    setUserDetails(prev=>({
+      ...prev, 
+      cerdits: userDetails?.credits ? userDetails?.credits - 10 : 0
+    }))
+    setVideoData({});
+  };
+
   const GenerateAudioCaption = async (audioFileUrl: string) => {
     try {
       const response = await axios.post('/api/generate-caption', { audioFileUrl });
@@ -91,6 +113,8 @@ function CreateNew() {
         console.error("Error generating image:", error);
       }
     }
+    console.log(images);
+    
     setImageList(images);
     setVideoData(prev => ({
       ...prev,
@@ -109,8 +133,7 @@ function CreateNew() {
       }).returning();
       setVideoId(result[0].id);
       setPlayVideo(true);
-
-      console.log('Video data saved:', result);
+      await UpdateUserDetails();
       setLoading(false);
     } catch (error) {
       console.error("Error saving video data:", error);
