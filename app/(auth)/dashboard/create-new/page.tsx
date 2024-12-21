@@ -113,7 +113,6 @@ function CreateNew() {
         console.error("Error generating image:", error);
       }
     }
-    console.log(images);
     
     setImageList(images);
     setVideoData(prev => ({

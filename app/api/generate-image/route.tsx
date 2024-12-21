@@ -26,8 +26,6 @@ export async function POST(req: NextRequest) {
             num_output: 1
         };
         
-        // Output prediction logs for debugging
-        console.log("Starting prediction with input:", input);
         
         const prediction = await replicate.predictions.create({
             version: "5599ed30703defd1d160a25a63321b4dec97101d98b4674bcc56e41f62f35637",
@@ -36,7 +34,6 @@ export async function POST(req: NextRequest) {
 
         // Wait for the prediction to complete
         const output = await replicate.wait(prediction);
-        console.log("Prediction output:", output);
 
         if (!output?.output?.[0]) {
             throw new Error("No output generated");
@@ -48,7 +45,6 @@ export async function POST(req: NextRequest) {
         const storageRef = ref(storage, fileName);
         await uploadString(storageRef, base64Image, 'data_url');
         const downloadUrl = await getDownloadURL(storageRef);
-        console.log(downloadUrl);
         
 
 

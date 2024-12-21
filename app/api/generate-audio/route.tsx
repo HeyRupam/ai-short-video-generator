@@ -21,7 +21,6 @@ export async function POST(req:Request) {
     const audioBuffer = Buffer.from(response.audioContent, 'binary');
     await uploadBytes(storageRef, audioBuffer, {contentType: 'audio/mp3'});
     const downloadUrl = await getDownloadURL(storageRef);
-    // console.log(downloadUrl);
     
     return NextResponse.json({result:downloadUrl});
 }
