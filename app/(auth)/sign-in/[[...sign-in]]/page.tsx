@@ -1,6 +1,4 @@
 import { SignIn } from '@clerk/nextjs'
-import VideoPlayer from '@/components/ui/VideoPlayer';
-import ReelsPlayer from '@/components/ui/ReelsPlayer';
 
 export default function Page() {
   const reels = [
@@ -12,10 +10,7 @@ export default function Page() {
     { id: 3, videoPath: "/videos/kk.mp4" },
   ];
   return (
-    <div className='grid grid-cols-1 md:grid-cols-2'>
-      <div className='flex justify-center items-center h-screen'>
-      <ReelsPlayer reels={reels}/>
-      </div>
+    <div className='grid grid-cols-1'>
       <div className='flex justify-center items-center h-screen'>
         <SignIn />
       </div>
